@@ -4,6 +4,7 @@ import Tabledata from './components/Tabledata'
 // import useLocalStorage from './hooks/useLocalStorage'
 import './App.scss'
 import api from './api'
+
  
 interface IBook {
   id: number
@@ -67,13 +68,14 @@ function App() {
   // const [storedBooks, setStoredBooks] = useLocalStorage<IBook[]>('books', initialBookState)
   const [searchBook, setSearchBoook] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const booksPerPage = 2;
- 
+  // const [loading, setLoading] = useState<boolean>(false);
   const [books, dispatch] = useReducer(bookReducer, initialBookState);
+  const booksPerPage = 2;
   // const [searchTerm, setSearchTerm] = useState('');
  
   useEffect(() => {
     const fetchBooks = async () => {
+      // setLoading(true);
       try {
         const response = await api.get('/books');
         dispatch({ type: 'set_books', books: response.data });
@@ -83,7 +85,9 @@ function App() {
         }
       } catch (error) {
         console.error('Error fetching books:', error);
-      }
+      } finally {
+        // setLoading(false);
+    }
     };
  
     fetchBooks();
@@ -150,12 +154,10 @@ const [refresh, setRefresh] = useState<boolean>(false);
   return (
     <>
     <div className="body_container">
-    <Form
-    
-    addBook={addBook} />
+    <Form addBook={addBook} />
     <input type='text'  placeholder="Search by book tittle or authorname..." value={searchBook} onChange={handleSearch} />
-    <Tabledata
     
+    <Tabledata
     books={books }
     removeBook={removeBook}
     editBook={editBook}

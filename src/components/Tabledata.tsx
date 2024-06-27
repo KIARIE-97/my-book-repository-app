@@ -1,5 +1,7 @@
 
 import './tabledata.scss'
+// import Loader from './Loader'
+import { PuffLoader } from "react-spinners";
 
   interface IBook {
   id: number,
@@ -12,6 +14,7 @@ import './tabledata.scss'
   removeBook: (id: number) => void;
   editBook: (id: number, book: IBook) => void;
   resetbook: () => void;
+
   }
 
 const Tabledata = ({books, removeBook, editBook, resetbook}: tabledataProps) => {
@@ -27,6 +30,12 @@ const Tabledata = ({books, removeBook, editBook, resetbook}: tabledataProps) => 
               <th>Year of Publication</th>
             </tr>
           </thead>
+          <tbody className='loader'>
+            {books.length === 0 && <tr><td colSpan={3}><PuffLoader
+  color="#ec1eaf"
+  size={125}
+ loading={true} /></td></tr>}
+          </tbody>
           <tbody>
             {books.map((book, index) => (
               <tr key={index}>

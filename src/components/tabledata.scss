@@ -26,6 +26,7 @@
             text-align: left;
 
         }
+       
         td{
             padding: 5px;
             text-align: left;
@@ -46,6 +47,13 @@
         tr:hover{
             background-color: #85588b;
         }
+    }
+    .loader{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        // margin: 50px 50px 50px 50px;
+        // height: 100vh;
     }
    
     .reset{
