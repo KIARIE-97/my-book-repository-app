@@ -66,11 +66,11 @@ const bookReducer = (state: IBook[], action: Action) => {
  
 function App() {
   // const [storedBooks, setStoredBooks] = useLocalStorage<IBook[]>('books', initialBookState)
-  const [searchBook, setSearchBoook] = useState('');
+  const [searchBook, setSearchBook] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   // const [loading, setLoading] = useState<boolean>(false);
   const [books, dispatch] = useReducer(bookReducer, initialBookState);
-  const booksPerPage = 2;
+  const booksPerPage = 5;
   // const [searchTerm, setSearchTerm] = useState('');
  
   useEffect(() => {
@@ -122,34 +122,46 @@ const addBook = async(book: Omit<IBook, 'id'>) => {
     const response = await api.post('/books', book);
     dispatch({ type: 'Add_book', book: response.data });
     if (response.status === 201) {
-      setRefresh(!refresh)
+      
     }
   } catch (error) {
     console.error('Error adding book:', error);
   }
 }
 //searching book
-useEffect(() => {
-  dispatch({type: 'search_book', book: books.filter((book) => book.bookName.toLowerCase() || book.authorName.toLowerCase().includes(searchBook.toLowerCase()))})
-}, [searchBook])
-const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-  setSearchBoook(event.target.value);
+// useEffect(() => {
+//   dispatch({type: 'search_book', book: books.filter((book) => book.bookName.toLowerCase() || book.authorName.toLowerCase().includes(searchBook.toLowerCase()))})
+// }, [searchBook])
+// const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+//   setSearchBoook(event.target.value);
  
+// };
+const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+  setSearchBook(e.target.value);
 };
+
+const filteredBooks = books.filter(book => {
+  // Ensure book.title is not undefined before calling toLowerCase()
+  return book.bookName && book.bookName.toLowerCase().includes(searchBook.toLowerCase());
+});
  
-const totalPages = Math.ceil(books.length / booksPerPage);
-const pages = Array.from({ length: totalPages }, (_, i) => i + 1); // create an array of page numbers
+
  
-const handleNext = useCallback(() => {
-  setCurrentPage((prevPage) => (prevPage < totalPages ? prevPage + 1 : prevPage));
-}, [totalPages]);
+const indexOfLastBook = currentPage * booksPerPage;
+  const indexOfFirstBook = indexOfLastBook - booksPerPage;
+  const currentBooks = filteredBooks.slice(indexOfFirstBook, indexOfLastBook);
  
-const handlePrevious = useCallback(() => {
-  setCurrentPage((prevPage) => (prevPage > 1 ? prevPage - 1 : prevPage));
-}, []);
- 
-const [refresh, setRefresh] = useState<boolean>(false);
- 
+  const paginate = useCallback(
+    (direction: 'next' | 'prev') => {
+      if (direction === 'next' && currentPage < Math.ceil(filteredBooks.length / booksPerPage)) {
+        setCurrentPage(prevPage => prevPage + 1);
+      } else if (direction === 'prev' && currentPage > 1) {
+        setCurrentPage(prevPage => prevPage - 1);
+      }
+    },
+    [currentPage, filteredBooks.length]
+  );
+
  
   return (
     <>
@@ -158,27 +170,22 @@ const [refresh, setRefresh] = useState<boolean>(false);
     <input type='text'  placeholder="Search by book tittle or authorname..." value={searchBook} onChange={handleSearch} />
     
     <Tabledata
-    books={books }
+    books={currentBooks }
     removeBook={removeBook}
     editBook={editBook}
     resetbook={reset}
     />
      <div className="func">
-     {/* <div>
-        {currentBooks.map((book, index) => (
-          <div key={index}>{book.bookName}</div>
-        ))}
-      </div> */}
       <div className='two'>
-        <button onClick={handlePrevious} disabled={currentPage === 1}>
+        <button onClick={() => paginate('prev')} >
           Previous
         </button>
-        <button onClick={handleNext} disabled={currentPage === totalPages}>
+        <button onClick={() => paginate('next')} >
           Next
         </button>
       </div>
-      <div>
-        {pages.map((page) => (
+      {/* <div>
+        {currentBooks.map((page) => (
           <button
             key={page}
             onClick={() => setCurrentPage(page)}
@@ -187,7 +194,7 @@ const [refresh, setRefresh] = useState<boolean>(false);
             {page}
           </button>
         ))}
-      </div>
+      </div> */}
       </div>
       </div>
     </>
